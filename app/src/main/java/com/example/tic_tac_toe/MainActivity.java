@@ -11,15 +11,18 @@ public class MainActivity extends AppCompatActivity {
     int active = 0;
     int[] state = {2, 2, 2, 2, 2, 2, 2, 2, 2};
     int[][] win_arr = {{0, 1, 2}, {3, 4, 5}, {6, 7, 8},
-                       {0, 3, 6}, {1, 4, 7}, {2, 5, 8},
-                       {0, 4, 8}, {2, 4, 6}};
+            {0, 3, 6}, {1, 4, 7}, {2, 5, 8},
+            {0, 4, 8}, {2, 4, 6}};
     boolean gameActive = true;
+
+    int scoreX = 0,scoreO = 0;
 
     public void playerTap(View view) {
         ImageView img = (ImageView) view;
         int tag_no = Integer.parseInt(img.getTag().toString());
 
-        if(!gameActive) game_Reset(view);
+        if (!gameActive) return; // Do nothing if the game is not active
+
         if (state[tag_no] == 2 && gameActive) {
             state[tag_no] = active;
             img.setTranslationY(-1000f);
@@ -38,18 +41,31 @@ public class MainActivity extends AppCompatActivity {
             img.animate().translationYBy(1000f).setDuration(300);
         }
 
-        for(int it[]:win_arr) {
-            if(state[it[0]]==state[it[1]] && state[it[1]]==state[it[2]] && state[it[0]]!=2) {
+        // Check for winner
+        for (int[] winCondition : win_arr) {
+            if (state[winCondition[0]] == state[winCondition[1]] &&
+                    state[winCondition[1]] == state[winCondition[2]] &&
+                    state[winCondition[0]] != 2) {
                 String winner;
-                gameActive=false;
-                if (state[it[0]] == 0) winner = "X won the game";
-                else winner = "O won the game";
+                gameActive = false;
+                if (state[winCondition[0]] == 0) {
+                    winner = "X won the game!";
+                    scoreX++;
+                } else {
+                    winner = "O won the game!";
+                    scoreO++;
+                }
                 TextView player_turn = findViewById(R.id.player_turn);
                 player_turn.setText(winner);
+
+                // Update scores
+                TextView scoreTextView = findViewById(R.id.player_score);
+                scoreTextView.setText("Score: X - " + scoreX + " | O - " + scoreO);
                 return;
             }
         }
 
+        // Check for a tie
         boolean tie = true;
         for (int i : state) {
             if (i == 2) {
@@ -64,19 +80,25 @@ public class MainActivity extends AppCompatActivity {
             player_turn.setText("It's a tie!");
         }
     }
-    public void game_Reset(View view) {
-        gameActive=true;
-        active=0;
-        for (int i = 0; i < state.length; i++)   state[i] = 2;
-        ((ImageView)findViewById(R.id.imageView0)).setImageResource(0);
-        ((ImageView)findViewById(R.id.imageView1)).setImageResource(0);
-        ((ImageView)findViewById(R.id.imageView2)).setImageResource(0);
-        ((ImageView)findViewById(R.id.imageView3)).setImageResource(0);
-        ((ImageView)findViewById(R.id.imageView4)).setImageResource(0);
-        ((ImageView)findViewById(R.id.imageView5)).setImageResource(0);
-        ((ImageView)findViewById(R.id.imageView6)).setImageResource(0);
-        ((ImageView)findViewById(R.id.imageView7)).setImageResource(0);
-        ((ImageView)findViewById(R.id.imageView8)).setImageResource(0);
+
+    // Game Reset
+    public void resetGame(View view) {
+        gameActive = true;
+        active = 0;
+        for (int i = 0; i < state.length; i++) state[i] = 2;
+
+        // Clear the board
+        ((ImageView) findViewById(R.id.imageView0)).setImageResource(0);
+        ((ImageView) findViewById(R.id.imageView1)).setImageResource(0);
+        ((ImageView) findViewById(R.id.imageView2)).setImageResource(0);
+        ((ImageView) findViewById(R.id.imageView3)).setImageResource(0);
+        ((ImageView) findViewById(R.id.imageView4)).setImageResource(0);
+        ((ImageView) findViewById(R.id.imageView5)).setImageResource(0);
+        ((ImageView) findViewById(R.id.imageView6)).setImageResource(0);
+        ((ImageView) findViewById(R.id.imageView7)).setImageResource(0);
+        ((ImageView) findViewById(R.id.imageView8)).setImageResource(0);
+
+        // Reset turn display
         TextView player_turn = findViewById(R.id.player_turn);
         player_turn.setText("X's turn - Tap to play");
     }
@@ -85,5 +107,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Initialize score
+        TextView scoreTextView = findViewById(R.id.player_score);
+        scoreTextView.setText("Score: X - 0 | O - 0");
     }
 }
